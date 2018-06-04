@@ -2,7 +2,7 @@
 Copyright © 2013-2018 chibayuki@foxmail.com
 
 2048
-Version 7.1.17000.5459.R17.180602-0000
+Version 7.1.17000.5459.R17.180604-0000
 
 This file is part of 2048
 
@@ -39,7 +39,7 @@ namespace WinFormApp
         private static readonly Int32 BuildNumber = new Version(Application.ProductVersion).Build; // 版本号。
         private static readonly Int32 BuildRevision = new Version(Application.ProductVersion).Revision; // 修订版本。
         private static readonly string LabString = "R17"; // 分支名。
-        private static readonly string BuildTime = "180602-0000"; // 编译时间。
+        private static readonly string BuildTime = "180604-0000"; // 编译时间。
 
         //
 
@@ -1318,7 +1318,7 @@ namespace WinFormApp
                                     string StrVal = RegexUint.Replace(Fields[i++], string.Empty);
                                     E = Convert.ToInt32(StrVal);
 
-                                    if ((Index.X >= 0 && Index.X < Record_Last.Range.Width && Index.Y >= 0 && Index.Y < Record_Last.Range.Height) && (E >= 1 && E <= TheoreticalMaxValueOfMax))
+                                    if ((Index.X >= 0 && Index.X < Record_Last.Range.Width && Index.Y >= 0 && Index.Y < Record_Last.Range.Height) && (E > 0 && E <= TheoreticalMaxValueOfMax))
                                     {
                                         ElementArray_Last[Index.X, Index.Y] = E;
                                         ElementIndexList_Last.Add(Index);
@@ -1536,7 +1536,7 @@ namespace WinFormApp
                                         string StrVal = RegexUint.Replace(Fields_Array[2], string.Empty);
                                         E = Convert.ToInt32(StrVal);
 
-                                        if ((Index.X >= 0 && Index.X < Record_Last.Range.Width && Index.Y >= 0 && Index.Y < Record_Last.Range.Height) && (E >= 1 && E <= TheoreticalMaxValueOfMax))
+                                        if ((Index.X >= 0 && Index.X < Record_Last.Range.Width && Index.Y >= 0 && Index.Y < Record_Last.Range.Height) && (E > 0 && E <= TheoreticalMaxValueOfMax))
                                         {
                                             S.Array[Index.X, Index.Y] = E;
                                         }
@@ -2148,7 +2148,7 @@ namespace WinFormApp
                 {
                     return Me.RecommendColors.Background.ToColor();
                 }
-                else if (E >= 1)
+                else if (E > 0)
                 {
                     Int32 Pow = E - 1;
 
@@ -2272,7 +2272,7 @@ namespace WinFormApp
 
             //
 
-            string StringText = (E >= 1 ? Math.Pow(2, E).ToString() : string.Empty);
+            string StringText = (E > 0 ? Math.Pow(2, E).ToString() : string.Empty);
 
             if (StringText.Length > 0)
             {
