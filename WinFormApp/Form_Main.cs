@@ -2,7 +2,7 @@
 Copyright © 2013-2018 chibayuki@foxmail.com
 
 2048
-Version 7.1.17000.5459.R17.180604-0000
+Version 7.1.17000.5459.R17.180606-0000
 
 This file is part of 2048
 
@@ -39,7 +39,7 @@ namespace WinFormApp
         private static readonly Int32 BuildNumber = new Version(Application.ProductVersion).Build; // 版本号。
         private static readonly Int32 BuildRevision = new Version(Application.ProductVersion).Revision; // 修订版本。
         private static readonly string LabString = "R17"; // 分支名。
-        private static readonly string BuildTime = "180604-0000"; // 编译时间。
+        private static readonly string BuildTime = "180606-0000"; // 编译时间。
 
         //
 
@@ -194,7 +194,7 @@ namespace WinFormApp
 
         private Int32[,] ElementArray_Last = new Int32[CAPACITY, CAPACITY]; // 上次游戏的元素矩阵。
 
-        private List<Point> ElementIndexList_Last = new List<Point>(0); // 上次游戏的元素索引列表。
+        private List<Point> ElementIndexList_Last = new List<Point>(CAPACITY * CAPACITY); // 上次游戏的元素索引列表。
 
         private string StepListString = string.Empty; // 上次游戏中表示操作步骤列表的字符串。
 
@@ -793,7 +793,7 @@ namespace WinFormApp
                     if (OldVersionList.Count > 0)
                     {
                         List<Version> OldVersionList_Copy = new List<Version>(OldVersionList);
-                        List<Version> OldVersionList_Sorted = new List<Version>(0);
+                        List<Version> OldVersionList_Sorted = new List<Version>(OldVersionList_Copy.Count);
 
                         while (OldVersionList_Copy.Count > 0)
                         {
@@ -813,11 +813,13 @@ namespace WinFormApp
 
                         for (int i = 0; i < OldVersionList_Sorted.Count; i++)
                         {
-                            if (Directory.Exists(RootDir_Product + "\\" + OldVersionList_Sorted[i].Build + "." + OldVersionList_Sorted[i].Revision))
+                            string Dir = RootDir_Product + "\\" + OldVersionList_Sorted[i].Build + "." + OldVersionList_Sorted[i].Revision;
+
+                            if (Directory.Exists(Dir))
                             {
                                 try
                                 {
-                                    Com.IO.CopyFolder(RootDir_Product + "\\" + OldVersionList_Sorted[i].Build + "." + OldVersionList_Sorted[i].Revision, RootDir_CurrentVersion);
+                                    Com.IO.CopyFolder(Dir, RootDir_CurrentVersion);
 
                                     break;
                                 }
@@ -1996,7 +1998,19 @@ namespace WinFormApp
             // 返回二维矩阵的浅表副本。Array：矩阵。
             //
 
-            return (Int32[,])Array.Clone();
+            try
+            {
+                if (Array != null)
+                {
+                    return (Int32[,])Array.Clone();
+                }
+
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         // 冗余量。
@@ -2009,20 +2023,25 @@ namespace WinFormApp
 
             try
             {
-                Int32 ZeroCount = 0;
-
-                for (int X = 0; X < Cap.Width; X++)
+                if (Array != null)
                 {
-                    for (int Y = 0; Y < Cap.Height; Y++)
+                    Int32 ZeroCount = 0;
+
+                    for (int X = 0; X < Cap.Width; X++)
                     {
-                        if (Array[X, Y] == 0)
+                        for (int Y = 0; Y < Cap.Height; Y++)
                         {
-                            ZeroCount++;
+                            if (Array[X, Y] == 0)
+                            {
+                                ZeroCount++;
+                            }
                         }
                     }
+
+                    return ZeroCount;
                 }
 
-                return ZeroCount;
+                return 0;
             }
             catch
             {
@@ -2038,26 +2057,31 @@ namespace WinFormApp
             // 返回二维矩阵中所有值为指定值的元素的索引的列表。Array：矩阵，索引为 [x, y]；Cap：矩阵的大小，分量 (Width, Height) 分别表示沿 x 方向和沿 y 方向的元素数量；Value：指定值。
             //
 
-            List<Point> L = new List<Point>(0);
-
             try
             {
-                for (int X = 0; X < Cap.Width; X++)
+                if (Array != null)
                 {
-                    for (int Y = 0; Y < Cap.Height; Y++)
+                    List<Point> L = new List<Point>(Cap.Width * Cap.Height);
+
+                    for (int X = 0; X < Cap.Width; X++)
                     {
-                        if (Array[X, Y] == Value)
+                        for (int Y = 0; Y < Cap.Height; Y++)
                         {
-                            L.Add(new Point(X, Y));
+                            if (Array[X, Y] == Value)
+                            {
+                                L.Add(new Point(X, Y));
+                            }
                         }
                     }
+
+                    return L;
                 }
 
-                return L;
+                return new List<Point>(0);
             }
             catch
             {
-                return L;
+                return new List<Point>(0);
             }
         }
 
@@ -2071,11 +2095,14 @@ namespace WinFormApp
 
             try
             {
-                if (GetZeroCountOfArray(Array, Cap) > 0)
+                if (Array != null)
                 {
-                    List<Point> L = GetCertainIndexListOfArray(Array, Cap, 0);
+                    if (GetZeroCountOfArray(Array, Cap) > 0)
+                    {
+                        List<Point> L = GetCertainIndexListOfArray(Array, Cap, 0);
 
-                    return L[Com.Statistics.RandomInteger(L.Count)];
+                        return L[Com.Statistics.RandomInteger(L.Count)];
+                    }
                 }
 
                 return new Point(-1, -1);
@@ -2689,7 +2716,7 @@ namespace WinFormApp
                     case Directions.X_DEC:
                         for (int Y = 0; Y < Range.Height; Y++)
                         {
-                            List<Int32> Row = new List<Int32>(0);
+                            List<Int32> Row = new List<Int32>(Range.Width);
 
                             for (int X = 0; X < Range.Width; X++)
                             {
@@ -2727,7 +2754,7 @@ namespace WinFormApp
                     case Directions.X_INC:
                         for (int Y = 0; Y < Range.Height; Y++)
                         {
-                            List<Int32> Row = new List<Int32>(0);
+                            List<Int32> Row = new List<Int32>(Range.Width);
 
                             for (int X = Range.Width - 1; X >= 0; X--)
                             {
@@ -2765,7 +2792,7 @@ namespace WinFormApp
                     case Directions.Y_DEC:
                         for (int X = 0; X < Range.Width; X++)
                         {
-                            List<Int32> Column = new List<Int32>(0);
+                            List<Int32> Column = new List<Int32>(Range.Height);
 
                             for (int Y = 0; Y < Range.Height; Y++)
                             {
@@ -2803,7 +2830,7 @@ namespace WinFormApp
                     case Directions.Y_INC:
                         for (int X = 0; X < Range.Width; X++)
                         {
-                            List<Int32> Column = new List<Int32>(0);
+                            List<Int32> Column = new List<Int32>(Range.Height);
 
                             for (int Y = Range.Height - 1; Y >= 0; Y--)
                             {
@@ -2873,7 +2900,7 @@ namespace WinFormApp
                         case Directions.X_DEC:
                             for (int Y = 0; Y < Range.Height; Y++)
                             {
-                                List<Int32> IndexList = new List<Int32>(0);
+                                List<Int32> IndexList = new List<Int32>(Range.Width);
 
                                 for (int X = 0; X < Range.Width; X++)
                                 {
@@ -2915,7 +2942,7 @@ namespace WinFormApp
                         case Directions.X_INC:
                             for (int Y = 0; Y < Range.Height; Y++)
                             {
-                                List<Int32> IndexList = new List<Int32>(0);
+                                List<Int32> IndexList = new List<Int32>(Range.Width);
 
                                 for (int X = Range.Width - 1; X >= 0; X--)
                                 {
@@ -2957,7 +2984,7 @@ namespace WinFormApp
                         case Directions.Y_DEC:
                             for (int X = 0; X < Range.Width; X++)
                             {
-                                List<Int32> IndexList = new List<Int32>(0);
+                                List<Int32> IndexList = new List<Int32>(Range.Height);
 
                                 for (int Y = 0; Y < Range.Height; Y++)
                                 {
@@ -2999,7 +3026,7 @@ namespace WinFormApp
                         case Directions.Y_INC:
                             for (int X = 0; X < Range.Width; X++)
                             {
-                                List<Int32> IndexList = new List<Int32>(0);
+                                List<Int32> IndexList = new List<Int32>(Range.Height);
 
                                 for (int Y = Range.Height - 1; Y >= 0; Y--)
                                 {
@@ -3081,7 +3108,7 @@ namespace WinFormApp
         {
             get
             {
-                List<double> PL = new List<double>(0);
+                List<double> PL = new List<double>(MaxRandomElementValue + 1);
 
                 for (int i = 0; i <= MaxRandomElementValue; i++)
                 {
@@ -3319,7 +3346,6 @@ namespace WinFormApp
                     //
 
                     StepList_Previous.RemoveAt(StepList_Previous.Count - 1);
-                    StepList_Previous.TrimExcess();
 
                     //
 
@@ -3371,7 +3397,6 @@ namespace WinFormApp
                     //
 
                     StepList_Next.RemoveAt(StepList_Next.Count - 1);
-                    StepList_Next.TrimExcess();
 
                     //
 
