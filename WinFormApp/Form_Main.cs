@@ -276,6 +276,8 @@ namespace WinFormApp
             Me.SizeChanged += SizeChangedEvents;
             Me.ThemeChanged += ThemeColorChangedEvents;
             Me.ThemeColorChanged += ThemeColorChangedEvents;
+
+            Me.CloseVerification = CloseVerification;
         }
 
         #endregion
@@ -581,6 +583,17 @@ namespace WinFormApp
 
             Com.WinForm.ControlSubstitution.LabelAsButton(Label_GitHub_Base, Label_GitHub_Base_Click, Color.Transparent, Me.RecommendColors.Button_DEC.ToColor(), Me.RecommendColors.Button_INC.ToColor(), new Font("微软雅黑", 9.75F, FontStyle.Underline, GraphicsUnit.Point, 134), new Font("微软雅黑", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 134), new Font("微软雅黑", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 134));
             Com.WinForm.ControlSubstitution.LabelAsButton(Label_GitHub_Release, Label_GitHub_Release_Click, Color.Transparent, Me.RecommendColors.Button_DEC.ToColor(), Me.RecommendColors.Button_INC.ToColor(), new Font("微软雅黑", 9.75F, FontStyle.Underline, GraphicsUnit.Point, 134), new Font("微软雅黑", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 134), new Font("微软雅黑", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 134));
+        }
+
+        //
+
+        private bool CloseVerification(EventArgs e)
+        {
+            //
+            // 用于验证是否允许窗口关闭的方法。
+            //
+
+            return (!BackgroundWorker_LoadGameStep.IsBusy && !BackgroundWorker_SaveGameStep.IsBusy);
         }
 
         #endregion
@@ -1719,9 +1732,11 @@ namespace WinFormApp
 
             //
 
-            Me.Enabled = true;
-
             Me.Caption = ApplicationName;
+
+            //
+
+            Panel_Interrupt.Enabled = true;
         }
 
         private void LoadGameStepInBackground()
@@ -1730,9 +1745,11 @@ namespace WinFormApp
             // 后台加载游戏步骤。
             //
 
-            Me.Enabled = false;
-
             Me.Caption = ApplicationName + " [正在打开]";
+
+            //
+
+            Panel_Interrupt.Enabled = false;
 
             //
 
@@ -1747,9 +1764,11 @@ namespace WinFormApp
             // 前台加载游戏步骤。
             //
 
-            Me.Enabled = false;
-
             Me.Caption = ApplicationName + " [正在打开]";
+
+            //
+
+            Panel_Interrupt.Enabled = false;
 
             //
 
@@ -1775,9 +1794,11 @@ namespace WinFormApp
 
             //
 
-            Me.Enabled = true;
-
             Me.Caption = ApplicationName;
+
+            //
+
+            Panel_Interrupt.Enabled = true;
         }
 
         private void _SaveGameStep()
@@ -1939,9 +1960,11 @@ namespace WinFormApp
 
             //
 
-            Me.Enabled = true;
-
             Me.Caption = ApplicationName;
+
+            //
+
+            Panel_Interrupt.Enabled = true;
         }
 
         private void SaveGameStepInBackground()
@@ -1950,9 +1973,11 @@ namespace WinFormApp
             // 后台保存游戏步骤。
             //
 
-            Me.Enabled = false;
-
             Me.Caption = ApplicationName + " [正在保存]";
+
+            //
+
+            Panel_Interrupt.Enabled = false;
 
             //
 
@@ -3612,7 +3637,7 @@ namespace WinFormApp
 
                         //
 
-                        if (!GameIsOver && (ThisRecord.Score > 0 || StepList_Previous.Count + StepList_Next.Count > 0))
+                        if ((!BackgroundWorker_LoadGameStep.IsBusy && !BackgroundWorker_SaveGameStep.IsBusy) && !GameIsOver && (ThisRecord.Score > 0 || StepList_Previous.Count + StepList_Next.Count > 0))
                         {
                             SaveGameStepInForeground();
                         }
@@ -3881,38 +3906,41 @@ namespace WinFormApp
             // 鼠标按下 Panel_Environment。
             //
 
-            if (OperationMode == OperationModes.MouseClick)
+            if (!BackgroundWorker_LoadGameStep.IsBusy && !BackgroundWorker_SaveGameStep.IsBusy)
             {
-                if (!GameIsOver && e.Button == MouseButtons.Left)
+                if (OperationMode == OperationModes.MouseClick)
                 {
-                    double CursorAngle = Com.Geometry.GetAngleOfTwoPoints(new Com.PointD(Panel_Environment.Width / 2, Panel_Environment.Height / 2), new Com.PointD(Com.Geometry.GetCursorPositionOfControl(Panel_Environment)));
+                    if (!GameIsOver && e.Button == MouseButtons.Left)
+                    {
+                        double CursorAngle = Com.Geometry.GetAngleOfTwoPoints(new Com.PointD(Panel_Environment.Width / 2, Panel_Environment.Height / 2), new Com.PointD(Com.Geometry.GetCursorPositionOfControl(Panel_Environment)));
 
-                    if (CursorAngle >= Math.PI / 4 && CursorAngle < Math.PI * 3 / 4)
-                    {
-                        TryLogicalMove(Directions.Y_INC);
-                    }
-                    else if (CursorAngle >= Math.PI * 3 / 4 && CursorAngle < Math.PI * 5 / 4)
-                    {
-                        TryLogicalMove(Directions.X_DEC);
-                    }
-                    else if (CursorAngle >= Math.PI * 5 / 4 && CursorAngle < Math.PI * 7 / 4)
-                    {
-                        TryLogicalMove(Directions.Y_DEC);
-                    }
-                    else
-                    {
-                        TryLogicalMove(Directions.X_INC);
+                        if (CursorAngle >= Math.PI / 4 && CursorAngle < Math.PI * 3 / 4)
+                        {
+                            TryLogicalMove(Directions.Y_INC);
+                        }
+                        else if (CursorAngle >= Math.PI * 3 / 4 && CursorAngle < Math.PI * 5 / 4)
+                        {
+                            TryLogicalMove(Directions.X_DEC);
+                        }
+                        else if (CursorAngle >= Math.PI * 5 / 4 && CursorAngle < Math.PI * 7 / 4)
+                        {
+                            TryLogicalMove(Directions.Y_DEC);
+                        }
+                        else
+                        {
+                            TryLogicalMove(Directions.X_INC);
+                        }
                     }
                 }
-            }
-            else if (OperationMode == OperationModes.TouchSlide)
-            {
-                if (!GameIsOver && e.Button == MouseButtons.Left)
+                else if (OperationMode == OperationModes.TouchSlide)
                 {
-                    TouchDown = true;
+                    if (!GameIsOver && e.Button == MouseButtons.Left)
+                    {
+                        TouchDown = true;
 
-                    TouchDownPosition = Com.Geometry.GetCursorPositionOfControl(Panel_Environment);
-                    TouchDownTime = DateTime.Now;
+                        TouchDownPosition = Com.Geometry.GetCursorPositionOfControl(Panel_Environment);
+                        TouchDownTime = DateTime.Now;
+                    }
                 }
             }
         }
@@ -3923,7 +3951,16 @@ namespace WinFormApp
             // 鼠标释放 Panel_Environment。
             //
 
-            TouchDown = false;
+            if (!BackgroundWorker_LoadGameStep.IsBusy && !BackgroundWorker_SaveGameStep.IsBusy)
+            {
+                if (OperationMode == OperationModes.TouchSlide)
+                {
+                    if (!GameIsOver && e.Button == MouseButtons.Left)
+                    {
+                        TouchDown = false;
+                    }
+                }
+            }
         }
 
         private void Panel_Environment_MouseMove(object sender, MouseEventArgs e)
@@ -3932,39 +3969,42 @@ namespace WinFormApp
             // 鼠标经过 Panel_Environment。
             //
 
-            Panel_Environment.Focus();
-
-            //
-
-            if (OperationMode == OperationModes.TouchSlide && TouchDown)
+            if (!BackgroundWorker_LoadGameStep.IsBusy && !BackgroundWorker_SaveGameStep.IsBusy)
             {
-                Point TouchPosition = Com.Geometry.GetCursorPositionOfControl(Panel_Environment);
-                DateTime TouchTime = DateTime.Now;
+                Panel_Environment.Focus();
 
-                double TouchDist = Com.PointD.DistanceBetween(new Com.PointD(TouchPosition), new Com.PointD(TouchDownPosition));
-                double TouchSec = (TouchTime - TouchDownTime).TotalSeconds;
+                //
 
-                if (TouchDist >= TouchSlideEffMinDist || (TouchDist / TouchSec >= TouchSlideEffMinVelo && TouchDist * TouchSec >= TouchSlideEffMinLT))
+                if (OperationMode == OperationModes.TouchSlide && TouchDown)
                 {
-                    TouchDown = false;
+                    Point TouchPosition = Com.Geometry.GetCursorPositionOfControl(Panel_Environment);
+                    DateTime TouchTime = DateTime.Now;
 
-                    double CursorAngle = Com.Geometry.GetAngleOfTwoPoints(new Com.PointD(TouchDownPosition), new Com.PointD(TouchPosition));
+                    double TouchDist = Com.PointD.DistanceBetween(new Com.PointD(TouchPosition), new Com.PointD(TouchDownPosition));
+                    double TouchSec = (TouchTime - TouchDownTime).TotalSeconds;
 
-                    if (CursorAngle >= Math.PI / 4 && CursorAngle < Math.PI * 3 / 4)
+                    if (TouchDist >= TouchSlideEffMinDist || (TouchDist / TouchSec >= TouchSlideEffMinVelo && TouchDist * TouchSec >= TouchSlideEffMinLT))
                     {
-                        TryLogicalMove(Directions.Y_INC);
-                    }
-                    else if (CursorAngle >= Math.PI * 3 / 4 && CursorAngle < Math.PI * 5 / 4)
-                    {
-                        TryLogicalMove(Directions.X_DEC);
-                    }
-                    else if (CursorAngle >= Math.PI * 5 / 4 && CursorAngle < Math.PI * 7 / 4)
-                    {
-                        TryLogicalMove(Directions.Y_DEC);
-                    }
-                    else
-                    {
-                        TryLogicalMove(Directions.X_INC);
+                        TouchDown = false;
+
+                        double CursorAngle = Com.Geometry.GetAngleOfTwoPoints(new Com.PointD(TouchDownPosition), new Com.PointD(TouchPosition));
+
+                        if (CursorAngle >= Math.PI / 4 && CursorAngle < Math.PI * 3 / 4)
+                        {
+                            TryLogicalMove(Directions.Y_INC);
+                        }
+                        else if (CursorAngle >= Math.PI * 3 / 4 && CursorAngle < Math.PI * 5 / 4)
+                        {
+                            TryLogicalMove(Directions.X_DEC);
+                        }
+                        else if (CursorAngle >= Math.PI * 5 / 4 && CursorAngle < Math.PI * 7 / 4)
+                        {
+                            TryLogicalMove(Directions.Y_DEC);
+                        }
+                        else
+                        {
+                            TryLogicalMove(Directions.X_INC);
+                        }
                     }
                 }
             }
@@ -3976,37 +4016,40 @@ namespace WinFormApp
             // 在 Panel_Environment 按下键。
             //
 
-            if (AlwaysEnableKeyboard || OperationMode == OperationModes.Keyboard)
+            if (!BackgroundWorker_LoadGameStep.IsBusy && !BackgroundWorker_SaveGameStep.IsBusy)
             {
-                if (!GameIsOver)
+                if (AlwaysEnableKeyboard || OperationMode == OperationModes.Keyboard)
                 {
-                    if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right || e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
+                    if (!GameIsOver)
                     {
-                        switch (e.KeyCode)
+                        if (e.KeyCode == Keys.Left || e.KeyCode == Keys.Right || e.KeyCode == Keys.Up || e.KeyCode == Keys.Down)
                         {
-                            case Keys.Left: TryLogicalMove(Directions.X_DEC); break;
-                            case Keys.Right: TryLogicalMove(Directions.X_INC); break;
-                            case Keys.Up: TryLogicalMove(Directions.Y_DEC); break;
-                            case Keys.Down: TryLogicalMove(Directions.Y_INC); break;
+                            switch (e.KeyCode)
+                            {
+                                case Keys.Left: TryLogicalMove(Directions.X_DEC); break;
+                                case Keys.Right: TryLogicalMove(Directions.X_INC); break;
+                                case Keys.Up: TryLogicalMove(Directions.Y_DEC); break;
+                                case Keys.Down: TryLogicalMove(Directions.Y_INC); break;
+                            }
+                        }
+                        else
+                        {
+                            switch (e.KeyCode)
+                            {
+                                case Keys.PageUp:
+                                case Keys.Back: Interrupt(InterruptActions.Previous); break;
+                                case Keys.PageDown:
+                                case Keys.Space: Interrupt(InterruptActions.Next); break;
+                            }
                         }
                     }
-                    else
-                    {
-                        switch (e.KeyCode)
-                        {
-                            case Keys.PageUp:
-                            case Keys.Back: Interrupt(InterruptActions.Previous); break;
-                            case Keys.PageDown:
-                            case Keys.Space: Interrupt(InterruptActions.Next); break;
-                        }
-                    }
-                }
 
-                switch (e.KeyCode)
-                {
-                    case Keys.Home: Interrupt(InterruptActions.Restart); break;
-                    case Keys.End:
-                    case Keys.Escape: Interrupt(InterruptActions.Exit); break;
+                    switch (e.KeyCode)
+                    {
+                        case Keys.Home: Interrupt(InterruptActions.Restart); break;
+                        case Keys.End:
+                        case Keys.Escape: Interrupt(InterruptActions.Exit); break;
+                    }
                 }
             }
         }
