@@ -2,7 +2,7 @@
 Copyright © 2013-2018 chibayuki@foxmail.com
 
 2048
-Version 7.1.17000.5459.R17.180606-0000
+Version 7.1.17000.5459.R17.180608-0000
 
 This file is part of 2048
 
@@ -39,7 +39,7 @@ namespace WinFormApp
         private static readonly Int32 BuildNumber = new Version(Application.ProductVersion).Build; // 版本号。
         private static readonly Int32 BuildRevision = new Version(Application.ProductVersion).Revision; // 修订版本。
         private static readonly string LabString = "R17"; // 分支名。
-        private static readonly string BuildTime = "180606-0000"; // 编译时间。
+        private static readonly string BuildTime = "180608-0000"; // 编译时间。
 
         //
 
@@ -277,7 +277,7 @@ namespace WinFormApp
             Me.ThemeChanged += ThemeColorChangedEvents;
             Me.ThemeColorChanged += ThemeColorChangedEvents;
 
-            Me.CloseVerification = CloseVerification;
+            Me.CloseVerification = CanClose;
         }
 
         #endregion
@@ -587,7 +587,7 @@ namespace WinFormApp
 
         //
 
-        private bool CloseVerification(EventArgs e)
+        private bool CanClose(EventArgs e)
         {
             //
             // 用于验证是否允许窗口关闭的方法。
@@ -1466,7 +1466,7 @@ namespace WinFormApp
         private DateTime BkgWkrStartingTime = DateTime.Now; // 处理游戏步骤的后台工作的开始时刻。
         private double BkgWkrComPct = 0; // 处理游戏步骤的后台工作的已完成百分比。
 
-        private string GetRemainingTimeString(Int64 Seconds)
+        private static string GetRemainingTimeString(Int64 Seconds)
         {
             //
             // 获取剩余时间字符串。Seconds：剩余时间的总秒数。
@@ -1476,7 +1476,7 @@ namespace WinFormApp
             {
                 TimeSpan TS = TimeSpan.FromSeconds(Seconds);
 
-                return ((Int32)TS.TotalDays >= 1 ? TS.Days + " 天 " + TS.Hours + " 小时" : ((Int32)TS.TotalHours >= 1 ? TS.Hours + " 小时 " + TS.Minutes / 5 * 5 + " 分" : ((Int32)TS.TotalMinutes >= 1 ? TS.Minutes + " 分 " + TS.Seconds / 15 * 15 + " 秒" : ((Int32)TS.TotalSeconds >= 0 ? Math.Max(1, TS.Seconds / 5) * 5 + " 秒" : string.Empty))));
+                return ((Int32)TS.TotalDays >= 1 ? string.Concat(TS.Days, " 天 ", TS.Hours, " 小时") : ((Int32)TS.TotalHours >= 1 ? string.Concat(TS.Hours, " 小时 ", TS.Minutes / 5 * 5, " 分") : ((Int32)TS.TotalMinutes >= 1 ? string.Concat(TS.Minutes, " 分 ", TS.Seconds / 15 * 15, " 秒") : ((Int32)TS.TotalSeconds >= 0 ? string.Concat(Math.Max(1, TS.Seconds / 5) * 5, " 秒") : string.Empty))));
             }
             catch
             {
