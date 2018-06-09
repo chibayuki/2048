@@ -1185,7 +1185,6 @@
             // 
             this.PictureBox_Undo.BackColor = System.Drawing.Color.Transparent;
             this.PictureBox_Undo.ErrorImage = null;
-            this.PictureBox_Undo.Image = ((System.Drawing.Image)(resources.GetObject("PictureBox_Undo.Image")));
             this.PictureBox_Undo.InitialImage = null;
             this.PictureBox_Undo.Location = new System.Drawing.Point(0, 0);
             this.PictureBox_Undo.Name = "PictureBox_Undo";
@@ -1198,7 +1197,6 @@
             // 
             this.PictureBox_Redo.BackColor = System.Drawing.Color.Transparent;
             this.PictureBox_Redo.ErrorImage = null;
-            this.PictureBox_Redo.Image = ((System.Drawing.Image)(resources.GetObject("PictureBox_Redo.Image")));
             this.PictureBox_Redo.InitialImage = null;
             this.PictureBox_Redo.Location = new System.Drawing.Point(50, 0);
             this.PictureBox_Redo.Name = "PictureBox_Redo";
@@ -1211,7 +1209,6 @@
             // 
             this.PictureBox_Restart.BackColor = System.Drawing.Color.Transparent;
             this.PictureBox_Restart.ErrorImage = null;
-            this.PictureBox_Restart.Image = ((System.Drawing.Image)(resources.GetObject("PictureBox_Restart.Image")));
             this.PictureBox_Restart.InitialImage = null;
             this.PictureBox_Restart.Location = new System.Drawing.Point(100, 0);
             this.PictureBox_Restart.Name = "PictureBox_Restart";
@@ -1224,7 +1221,6 @@
             // 
             this.PictureBox_ExitGame.BackColor = System.Drawing.Color.Transparent;
             this.PictureBox_ExitGame.ErrorImage = null;
-            this.PictureBox_ExitGame.Image = ((System.Drawing.Image)(resources.GetObject("PictureBox_ExitGame.Image")));
             this.PictureBox_ExitGame.InitialImage = null;
             this.PictureBox_ExitGame.Location = new System.Drawing.Point(150, 0);
             this.PictureBox_ExitGame.Name = "PictureBox_ExitGame";
