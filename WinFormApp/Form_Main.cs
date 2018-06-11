@@ -2,7 +2,7 @@
 Copyright © 2013-2018 chibayuki@foxmail.com
 
 2048
-Version 7.1.17000.5459.R17.180611-0000
+Version 7.1.17000.5459.R17.180612-0000
 
 This file is part of 2048
 
@@ -39,7 +39,7 @@ namespace WinFormApp
         private static readonly Int32 BuildNumber = new Version(Application.ProductVersion).Build; // 版本号。
         private static readonly Int32 BuildRevision = new Version(Application.ProductVersion).Revision; // 修订版本。
         private static readonly string LabString = "R17"; // 分支名。
-        private static readonly string BuildTime = "180611-0000"; // 编译时间。
+        private static readonly string BuildTime = "180612-0000"; // 编译时间。
 
         //
 
@@ -1316,6 +1316,8 @@ namespace WinFormApp
 
                     try
                     {
+                        Int32 LastMaxElementValue = (Int32)Math.Sqrt(Record_Last.Range.Width * Record_Last.Range.Height) + Record_Last.Range.Width * Record_Last.Range.Height - 1;
+
                         string SubStr = Com.Text.GetIntervalString(Str, "<Element>", "</Element>", false, false);
 
                         while (SubStr.IndexOf("(") != -1 && SubStr.IndexOf(")") != -1)
@@ -1342,7 +1344,7 @@ namespace WinFormApp
                                     string StrVal = RegexUint.Replace(Fields[i++], string.Empty);
                                     E = Convert.ToInt32(StrVal);
 
-                                    if ((Index.X >= 0 && Index.X < Record_Last.Range.Width && Index.Y >= 0 && Index.Y < Record_Last.Range.Height) && (E > 0 && E <= MaxElementValue))
+                                    if ((Index.X >= 0 && Index.X < Record_Last.Range.Width && Index.Y >= 0 && Index.Y < Record_Last.Range.Height) && (E > 0 && E <= LastMaxElementValue))
                                     {
                                         ElementMatrix_Last[Index.X, Index.Y] = E;
                                         ElementIndexList_Last.Add(Index);
@@ -1511,6 +1513,10 @@ namespace WinFormApp
 
                 //
 
+                Int32 LastMaxElementValue = (Int32)Math.Sqrt(Record_Last.Range.Width * Record_Last.Range.Height) + Record_Last.Range.Width * Record_Last.Range.Height - 1;
+
+                //
+
                 try
                 {
                     string SubStr = Com.Text.GetIntervalString(StepListString, "<Previous>", "</Previous>", false, false);
@@ -1560,7 +1566,7 @@ namespace WinFormApp
                                         string StrVal = RegexUint.Replace(Fields_Array[2], string.Empty);
                                         E = Convert.ToInt32(StrVal);
 
-                                        if ((Index.X >= 0 && Index.X < Record_Last.Range.Width && Index.Y >= 0 && Index.Y < Record_Last.Range.Height) && (E > 0 && E <= MaxElementValue))
+                                        if ((Index.X >= 0 && Index.X < Record_Last.Range.Width && Index.Y >= 0 && Index.Y < Record_Last.Range.Height) && (E > 0 && E <= LastMaxElementValue))
                                         {
                                             S.Array[Index.X, Index.Y] = E;
                                         }
@@ -1601,7 +1607,7 @@ namespace WinFormApp
                                 string StrE = RegexUint.Replace(Fields_Other[4], string.Empty);
                                 E = Convert.ToInt32(StrE);
 
-                                if (Sc >= 0 && (D >= 0 && D <= 3) && ElementMatrix_IndexValid(Index) && (E > 0 && E <= MaxElementValue))
+                                if (Sc >= 0 && (D >= 0 && D <= 3) && (Index.X >= 0 && Index.X < Record_Last.Range.Width && Index.Y >= 0 && Index.Y < Record_Last.Range.Height) && (E > 0 && E <= LastMaxElementValue))
                                 {
                                     S.Score = Sc;
                                     S.Direction = (Directions)D;
@@ -1667,7 +1673,7 @@ namespace WinFormApp
                                 string StrE = RegexUint.Replace(Fields[i++], string.Empty);
                                 E = Convert.ToInt32(StrE);
 
-                                if ((D >= 0 && D <= 3) && ElementMatrix_IndexValid(Index) && (E > 0 && E <= MaxElementValue))
+                                if ((D >= 0 && D <= 3) && (Index.X >= 0 && Index.X < Record_Last.Range.Width && Index.Y >= 0 && Index.Y < Record_Last.Range.Height) && (E > 0 && E <= LastMaxElementValue))
                                 {
                                     S.Direction = (Directions)D;
                                     S.Index = Index;
