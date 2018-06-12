@@ -2,7 +2,7 @@
 Copyright © 2013-2018 chibayuki@foxmail.com
 
 2048
-Version 7.1.17000.5459.R17.180612-0000
+Version 7.1.17000.5459.R17.180613-0000
 
 This file is part of 2048
 
@@ -39,7 +39,7 @@ namespace WinFormApp
         private static readonly Int32 BuildNumber = new Version(Application.ProductVersion).Build; // 版本号。
         private static readonly Int32 BuildRevision = new Version(Application.ProductVersion).Revision; // 修订版本。
         private static readonly string LabString = "R17"; // 分支名。
-        private static readonly string BuildTime = "180612-0000"; // 编译时间。
+        private static readonly string BuildTime = "180613-0000"; // 编译时间。
 
         //
 
@@ -4267,8 +4267,6 @@ namespace WinFormApp
 
         private Bitmap CurBmp; // 计分栏位图。
 
-        private Graphics CurBmpGrap; // 计分栏位图绘图。
-
         private void UpdateCurBmp()
         {
             //
@@ -4282,93 +4280,94 @@ namespace WinFormApp
 
             CurBmp = new Bitmap(Math.Max(1, Panel_Current.Width), Math.Max(1, Panel_Current.Height));
 
-            CurBmpGrap = Graphics.FromImage(CurBmp);
-
-            if (AntiAlias)
+            using (Graphics CurBmpGrap = Graphics.FromImage(CurBmp))
             {
-                CurBmpGrap.SmoothingMode = SmoothingMode.AntiAlias;
-                CurBmpGrap.TextRenderingHint = TextRenderingHint.AntiAlias;
+                if (AntiAlias)
+                {
+                    CurBmpGrap.SmoothingMode = SmoothingMode.AntiAlias;
+                    CurBmpGrap.TextRenderingHint = TextRenderingHint.AntiAlias;
+                }
+
+                CurBmpGrap.Clear(GameUIBackColor_DEC);
+
+                //
+
+                Rectangle Rect_Total = new Rectangle(new Point(0, 0), new Size(Math.Max(1, Panel_Current.Width), Math.Max(1, Panel_Current.Height)));
+                Rectangle Rect_Current = new Rectangle(Rect_Total.Location, new Size((Int32)Math.Max(2, Math.Min(1, Math.Sqrt(ThisRecord.Sum / TheoreticalMaxValueOfSum)) * Rect_Total.Width), Rect_Total.Height));
+
+                Color RectCr_Total = Me.RecommendColors.Background.ToColor(), RectCr_Current = Me.RecommendColors.Border.ToColor();
+
+                GraphicsPath Path_Total = new GraphicsPath();
+                Path_Total.AddRectangle(Rect_Total);
+                PathGradientBrush PGB_Total = new PathGradientBrush(Path_Total)
+                {
+                    CenterColor = RectCr_Total,
+                    SurroundColors = new Color[] { Com.ColorManipulation.ShiftLightnessByHSL(RectCr_Total, 0.3) },
+                    FocusScales = new PointF(1F, 0F)
+                };
+                CurBmpGrap.FillPath(PGB_Total, Path_Total);
+                Path_Total.Dispose();
+                PGB_Total.Dispose();
+
+                GraphicsPath Path_Current = new GraphicsPath();
+                Path_Current.AddRectangle(Rect_Current);
+                PathGradientBrush PGB_Current = new PathGradientBrush(Path_Current)
+                {
+                    CenterColor = RectCr_Current,
+                    SurroundColors = new Color[] { Com.ColorManipulation.ShiftLightnessByHSL(RectCr_Current, 0.3) },
+                    FocusScales = new PointF(1F, 0F)
+                };
+                CurBmpGrap.FillPath(PGB_Current, Path_Current);
+                Path_Current.Dispose();
+                PGB_Current.Dispose();
+
+                //
+
+                SizeF RegionSize_L = new SizeF(), RegionSize_R = new SizeF();
+                RectangleF RegionRect = new RectangleF();
+
+                string StringText_Score = Math.Max(0, ThisRecord.Score).ToString();
+                Color StringColor_Score = Me.RecommendColors.Text_INC.ToColor();
+                Font StringFont_Score = new Font("微软雅黑", 24F, FontStyle.Regular, GraphicsUnit.Point, 134);
+                RectangleF StringRect_Score = new RectangleF();
+                StringRect_Score.Size = CurBmpGrap.MeasureString(StringText_Score, StringFont_Score);
+
+                string StringText_Max = "最大值: ", StringText_Max_Val = Math.Max(0, ThisRecord.Max).ToString();
+                Color StringColor_Max = Me.RecommendColors.Text.ToColor(), StringColor_Max_Val = Me.RecommendColors.Text_INC.ToColor();
+                Font StringFont_Max = new Font("微软雅黑", 12F, FontStyle.Regular, GraphicsUnit.Point, 134), StringFont_Max_Val = new Font("微软雅黑", 12F, FontStyle.Bold, GraphicsUnit.Point, 134);
+                RectangleF StringRect_Max = new RectangleF(), StringRect_Max_Val = new RectangleF();
+                StringRect_Max.Size = CurBmpGrap.MeasureString(StringText_Max, StringFont_Max);
+                StringRect_Max_Val.Size = CurBmpGrap.MeasureString(StringText_Max_Val, StringFont_Max_Val);
+
+                string StringText_Sum = "求和: ", StringText_Sum_Val = Math.Max(0, ThisRecord.Sum).ToString();
+                Color StringColor_Sum = Me.RecommendColors.Text.ToColor(), StringColor_Sum_Val = Me.RecommendColors.Text_INC.ToColor();
+                Font StringFont_Sum = new Font("微软雅黑", 12F, FontStyle.Regular, GraphicsUnit.Point, 134), StringFont_Sum_Val = new Font("微软雅黑", 12F, FontStyle.Bold, GraphicsUnit.Point, 134);
+                RectangleF StringRect_Sum = new RectangleF(), StringRect_Sum_Val = new RectangleF();
+                StringRect_Sum.Size = CurBmpGrap.MeasureString(StringText_Sum, StringFont_Sum);
+                StringRect_Sum_Val.Size = CurBmpGrap.MeasureString(StringText_Sum_Val, StringFont_Sum_Val);
+
+                RegionSize_L = StringRect_Score.Size;
+                RegionSize_R = new SizeF(Math.Max(StringRect_Max.Width + StringRect_Max_Val.Width, StringRect_Sum.Width + StringRect_Sum_Val.Width), 0);
+
+                RegionRect.Size = new SizeF(Math.Max(RegionSize_L.Width + RegionSize_R.Width, Math.Min(EAryBmpRect.Width, Panel_Interrupt.Left - EAryBmpRect.X)), Panel_Current.Height);
+                RegionRect.Location = new PointF(Math.Max(0, Math.Min(EAryBmpRect.X + (EAryBmpRect.Width - RegionRect.Width) / 2, Panel_Interrupt.Left - RegionRect.Width)), 0);
+
+                StringRect_Score.Location = new PointF(RegionRect.X, (RegionRect.Height - StringRect_Score.Height) / 2);
+
+                Com.Painting2D.PaintTextWithShadow(CurBmp, StringText_Score, StringFont_Score, StringColor_Score, StringColor_Score, StringRect_Score.Location, 0.05F, AntiAlias);
+
+                StringRect_Max_Val.Location = new PointF(RegionRect.Right - StringRect_Max_Val.Width, (RegionRect.Height / 2 - StringRect_Max_Val.Height) / 2);
+                StringRect_Max.Location = new PointF(StringRect_Max_Val.X - StringRect_Max.Width, (RegionRect.Height / 2 - StringRect_Max.Height) / 2);
+
+                Com.Painting2D.PaintTextWithShadow(CurBmp, StringText_Max, StringFont_Max, StringColor_Max, StringColor_Max, StringRect_Max.Location, 0.1F, AntiAlias);
+                Com.Painting2D.PaintTextWithShadow(CurBmp, StringText_Max_Val, StringFont_Max_Val, StringColor_Max_Val, StringColor_Max_Val, StringRect_Max_Val.Location, 0.1F, AntiAlias);
+
+                StringRect_Sum_Val.Location = new PointF(RegionRect.Right - StringRect_Sum_Val.Width, RegionRect.Height / 2 + (RegionRect.Height / 2 - StringRect_Sum_Val.Height) / 2);
+                StringRect_Sum.Location = new PointF(StringRect_Sum_Val.X - StringRect_Sum.Width, RegionRect.Height / 2 + (RegionRect.Height / 2 - StringRect_Sum.Height) / 2);
+
+                Com.Painting2D.PaintTextWithShadow(CurBmp, StringText_Sum, StringFont_Sum, StringColor_Sum, StringColor_Sum, StringRect_Sum.Location, 0.1F, AntiAlias);
+                Com.Painting2D.PaintTextWithShadow(CurBmp, StringText_Sum_Val, StringFont_Sum_Val, StringColor_Sum_Val, StringColor_Sum_Val, StringRect_Sum_Val.Location, 0.1F, AntiAlias);
             }
-
-            CurBmpGrap.Clear(GameUIBackColor_DEC);
-
-            //
-
-            Rectangle Rect_Total = new Rectangle(new Point(0, 0), new Size(Math.Max(1, Panel_Current.Width), Math.Max(1, Panel_Current.Height)));
-            Rectangle Rect_Current = new Rectangle(Rect_Total.Location, new Size((Int32)Math.Max(2, Math.Min(1, Math.Sqrt(ThisRecord.Sum / TheoreticalMaxValueOfSum)) * Rect_Total.Width), Rect_Total.Height));
-
-            Color RectCr_Total = Me.RecommendColors.Background.ToColor(), RectCr_Current = Me.RecommendColors.Border.ToColor();
-
-            GraphicsPath Path_Total = new GraphicsPath();
-            Path_Total.AddRectangle(Rect_Total);
-            PathGradientBrush PGB_Total = new PathGradientBrush(Path_Total)
-            {
-                CenterColor = RectCr_Total,
-                SurroundColors = new Color[] { Com.ColorManipulation.ShiftLightnessByHSL(RectCr_Total, 0.3) },
-                FocusScales = new PointF(1F, 0F)
-            };
-            CurBmpGrap.FillPath(PGB_Total, Path_Total);
-            Path_Total.Dispose();
-            PGB_Total.Dispose();
-
-            GraphicsPath Path_Current = new GraphicsPath();
-            Path_Current.AddRectangle(Rect_Current);
-            PathGradientBrush PGB_Current = new PathGradientBrush(Path_Current)
-            {
-                CenterColor = RectCr_Current,
-                SurroundColors = new Color[] { Com.ColorManipulation.ShiftLightnessByHSL(RectCr_Current, 0.3) },
-                FocusScales = new PointF(1F, 0F)
-            };
-            CurBmpGrap.FillPath(PGB_Current, Path_Current);
-            Path_Current.Dispose();
-            PGB_Current.Dispose();
-
-            //
-
-            SizeF RegionSize_L = new SizeF(), RegionSize_R = new SizeF();
-            RectangleF RegionRect = new RectangleF();
-
-            string StringText_Score = Math.Max(0, ThisRecord.Score).ToString();
-            Color StringColor_Score = Me.RecommendColors.Text_INC.ToColor();
-            Font StringFont_Score = new Font("微软雅黑", 24F, FontStyle.Regular, GraphicsUnit.Point, 134);
-            RectangleF StringRect_Score = new RectangleF();
-            StringRect_Score.Size = CurBmpGrap.MeasureString(StringText_Score, StringFont_Score);
-
-            string StringText_Max = "最大值: ", StringText_Max_Val = Math.Max(0, ThisRecord.Max).ToString();
-            Color StringColor_Max = Me.RecommendColors.Text.ToColor(), StringColor_Max_Val = Me.RecommendColors.Text_INC.ToColor();
-            Font StringFont_Max = new Font("微软雅黑", 12F, FontStyle.Regular, GraphicsUnit.Point, 134), StringFont_Max_Val = new Font("微软雅黑", 12F, FontStyle.Bold, GraphicsUnit.Point, 134);
-            RectangleF StringRect_Max = new RectangleF(), StringRect_Max_Val = new RectangleF();
-            StringRect_Max.Size = CurBmpGrap.MeasureString(StringText_Max, StringFont_Max);
-            StringRect_Max_Val.Size = CurBmpGrap.MeasureString(StringText_Max_Val, StringFont_Max_Val);
-
-            string StringText_Sum = "求和: ", StringText_Sum_Val = Math.Max(0, ThisRecord.Sum).ToString();
-            Color StringColor_Sum = Me.RecommendColors.Text.ToColor(), StringColor_Sum_Val = Me.RecommendColors.Text_INC.ToColor();
-            Font StringFont_Sum = new Font("微软雅黑", 12F, FontStyle.Regular, GraphicsUnit.Point, 134), StringFont_Sum_Val = new Font("微软雅黑", 12F, FontStyle.Bold, GraphicsUnit.Point, 134);
-            RectangleF StringRect_Sum = new RectangleF(), StringRect_Sum_Val = new RectangleF();
-            StringRect_Sum.Size = CurBmpGrap.MeasureString(StringText_Sum, StringFont_Sum);
-            StringRect_Sum_Val.Size = CurBmpGrap.MeasureString(StringText_Sum_Val, StringFont_Sum_Val);
-
-            RegionSize_L = StringRect_Score.Size;
-            RegionSize_R = new SizeF(Math.Max(StringRect_Max.Width + StringRect_Max_Val.Width, StringRect_Sum.Width + StringRect_Sum_Val.Width), 0);
-
-            RegionRect.Size = new SizeF(Math.Max(RegionSize_L.Width + RegionSize_R.Width, Math.Min(EAryBmpRect.Width, Panel_Interrupt.Left - EAryBmpRect.X)), Panel_Current.Height);
-            RegionRect.Location = new PointF(Math.Max(0, Math.Min(EAryBmpRect.X + (EAryBmpRect.Width - RegionRect.Width) / 2, Panel_Interrupt.Left - RegionRect.Width)), 0);
-
-            StringRect_Score.Location = new PointF(RegionRect.X, (RegionRect.Height - StringRect_Score.Height) / 2);
-
-            Com.Painting2D.PaintTextWithShadow(CurBmp, StringText_Score, StringFont_Score, StringColor_Score, StringColor_Score, StringRect_Score.Location, 0.05F, AntiAlias);
-
-            StringRect_Max_Val.Location = new PointF(RegionRect.Right - StringRect_Max_Val.Width, (RegionRect.Height / 2 - StringRect_Max_Val.Height) / 2);
-            StringRect_Max.Location = new PointF(StringRect_Max_Val.X - StringRect_Max.Width, (RegionRect.Height / 2 - StringRect_Max.Height) / 2);
-
-            Com.Painting2D.PaintTextWithShadow(CurBmp, StringText_Max, StringFont_Max, StringColor_Max, StringColor_Max, StringRect_Max.Location, 0.1F, AntiAlias);
-            Com.Painting2D.PaintTextWithShadow(CurBmp, StringText_Max_Val, StringFont_Max_Val, StringColor_Max_Val, StringColor_Max_Val, StringRect_Max_Val.Location, 0.1F, AntiAlias);
-
-            StringRect_Sum_Val.Location = new PointF(RegionRect.Right - StringRect_Sum_Val.Width, RegionRect.Height / 2 + (RegionRect.Height / 2 - StringRect_Sum_Val.Height) / 2);
-            StringRect_Sum.Location = new PointF(StringRect_Sum_Val.X - StringRect_Sum.Width, RegionRect.Height / 2 + (RegionRect.Height / 2 - StringRect_Sum.Height) / 2);
-
-            Com.Painting2D.PaintTextWithShadow(CurBmp, StringText_Sum, StringFont_Sum, StringColor_Sum, StringColor_Sum, StringRect_Sum.Location, 0.1F, AntiAlias);
-            Com.Painting2D.PaintTextWithShadow(CurBmp, StringText_Sum_Val, StringFont_Sum_Val, StringColor_Sum_Val, StringColor_Sum_Val, StringRect_Sum_Val.Location, 0.1F, AntiAlias);
         }
 
         private void RepaintCurBmp()
@@ -4858,8 +4857,6 @@ namespace WinFormApp
 
         private Bitmap ProbabilityTrbBmp; // 概率衰减调节器位图。
 
-        private Graphics ProbabilityTrbBmpGrap; // 概率衰减调节器位图绘图。
-
         private Size ProbabilityTrbSliderSize => new Size(2, Panel_ProbabilityAdjustment.Height); // 概率衰减调节器滑块大小。
 
         private void UpdateProbabilityTrbBmp()
@@ -4875,70 +4872,71 @@ namespace WinFormApp
 
             ProbabilityTrbBmp = new Bitmap(Math.Max(1, Panel_ProbabilityAdjustment.Width), Math.Max(1, Panel_ProbabilityAdjustment.Height));
 
-            ProbabilityTrbBmpGrap = Graphics.FromImage(ProbabilityTrbBmp);
-
-            ProbabilityTrbBmpGrap.Clear(Panel_ProbabilityAdjustment.BackColor);
-
-            //
-
-            Color Color_Slider, Color_ScrollBar_Current, Color_ScrollBar_Unavailable;
-
-            if (Com.Geometry.CursorIsInControl(Panel_ProbabilityAdjustment) || ProbabilityIsAdjusting)
+            using (Graphics ProbabilityTrbBmpGrap = Graphics.FromImage(ProbabilityTrbBmp))
             {
-                Color_Slider = Com.ColorManipulation.ShiftLightnessByHSL(Me.RecommendColors.Border_INC, 0.3).ToColor();
-                Color_ScrollBar_Current = Com.ColorManipulation.ShiftLightnessByHSL(Me.RecommendColors.Border_INC, 0.3).ToColor();
-                Color_ScrollBar_Unavailable = Com.ColorManipulation.ShiftLightnessByHSL(Me.RecommendColors.Border_DEC, 0.3).ToColor();
+                ProbabilityTrbBmpGrap.Clear(Panel_ProbabilityAdjustment.BackColor);
+
+                //
+
+                Color Color_Slider, Color_ScrollBar_Current, Color_ScrollBar_Unavailable;
+
+                if (Com.Geometry.CursorIsInControl(Panel_ProbabilityAdjustment) || ProbabilityIsAdjusting)
+                {
+                    Color_Slider = Com.ColorManipulation.ShiftLightnessByHSL(Me.RecommendColors.Border_INC, 0.3).ToColor();
+                    Color_ScrollBar_Current = Com.ColorManipulation.ShiftLightnessByHSL(Me.RecommendColors.Border_INC, 0.3).ToColor();
+                    Color_ScrollBar_Unavailable = Com.ColorManipulation.ShiftLightnessByHSL(Me.RecommendColors.Border_DEC, 0.3).ToColor();
+                }
+                else
+                {
+                    Color_Slider = Me.RecommendColors.Border_INC.ToColor();
+                    Color_ScrollBar_Current = Me.RecommendColors.Border_INC.ToColor();
+                    Color_ScrollBar_Unavailable = Me.RecommendColors.Border_DEC.ToColor();
+                }
+
+                Rectangle Rect_Slider = new Rectangle(new Point((Panel_ProbabilityAdjustment.Width - ProbabilityTrbSliderSize.Width) * (Probability - Probability_MIN) / (Probability_MAX - Probability_MIN), 0), ProbabilityTrbSliderSize);
+                Rectangle Rect_ScrollBar_Current = new Rectangle(new Point(0, 0), new Size(Rect_Slider.X, Panel_ProbabilityAdjustment.Height));
+                Rectangle Rect_ScrollBar_Unavailable = new Rectangle(new Point(Rect_Slider.Right, 0), new Size(Panel_ProbabilityAdjustment.Width - Rect_Slider.Right, Panel_ProbabilityAdjustment.Height));
+
+                Rect_Slider.Width = Math.Max(1, Rect_Slider.Width);
+                Rect_ScrollBar_Current.Width = Math.Max(1, Rect_ScrollBar_Current.Width);
+                Rect_ScrollBar_Unavailable.Width = Math.Max(1, Rect_ScrollBar_Unavailable.Width);
+
+                GraphicsPath Path_ScrollBar_Unavailable = new GraphicsPath();
+                Path_ScrollBar_Unavailable.AddRectangle(Rect_ScrollBar_Unavailable);
+                PathGradientBrush PGB_ScrollBar_Unavailable = new PathGradientBrush(Path_ScrollBar_Unavailable)
+                {
+                    CenterColor = Color_ScrollBar_Unavailable,
+                    SurroundColors = new Color[] { Com.ColorManipulation.ShiftLightnessByHSL(Color_ScrollBar_Unavailable, 0.3) },
+                    FocusScales = new PointF(1F, 0F)
+                };
+                ProbabilityTrbBmpGrap.FillPath(PGB_ScrollBar_Unavailable, Path_ScrollBar_Unavailable);
+                Path_ScrollBar_Unavailable.Dispose();
+                PGB_ScrollBar_Unavailable.Dispose();
+
+                GraphicsPath Path_ScrollBar_Current = new GraphicsPath();
+                Path_ScrollBar_Current.AddRectangle(Rect_ScrollBar_Current);
+                PathGradientBrush PGB_ScrollBar_Current = new PathGradientBrush(Path_ScrollBar_Current)
+                {
+                    CenterColor = Color_ScrollBar_Current,
+                    SurroundColors = new Color[] { Com.ColorManipulation.ShiftLightnessByHSL(Color_ScrollBar_Current, 0.3) },
+                    FocusScales = new PointF(1F, 0F)
+                };
+                ProbabilityTrbBmpGrap.FillPath(PGB_ScrollBar_Current, Path_ScrollBar_Current);
+                Path_ScrollBar_Current.Dispose();
+                PGB_ScrollBar_Current.Dispose();
+
+                GraphicsPath Path_Slider = new GraphicsPath();
+                Path_Slider.AddRectangle(Rect_Slider);
+                PathGradientBrush PGB_Slider = new PathGradientBrush(Path_Slider)
+                {
+                    CenterColor = Color_Slider,
+                    SurroundColors = new Color[] { Com.ColorManipulation.ShiftLightnessByHSL(Color_Slider, 0.3) },
+                    FocusScales = new PointF(1F, 0F)
+                };
+                ProbabilityTrbBmpGrap.FillPath(PGB_Slider, Path_Slider);
+                Path_Slider.Dispose();
+                PGB_Slider.Dispose();
             }
-            else
-            {
-                Color_Slider = Me.RecommendColors.Border_INC.ToColor();
-                Color_ScrollBar_Current = Me.RecommendColors.Border_INC.ToColor();
-                Color_ScrollBar_Unavailable = Me.RecommendColors.Border_DEC.ToColor();
-            }
-
-            Rectangle Rect_Slider = new Rectangle(new Point((Panel_ProbabilityAdjustment.Width - ProbabilityTrbSliderSize.Width) * (Probability - Probability_MIN) / (Probability_MAX - Probability_MIN), 0), ProbabilityTrbSliderSize);
-            Rectangle Rect_ScrollBar_Current = new Rectangle(new Point(0, 0), new Size(Rect_Slider.X, Panel_ProbabilityAdjustment.Height));
-            Rectangle Rect_ScrollBar_Unavailable = new Rectangle(new Point(Rect_Slider.Right, 0), new Size(Panel_ProbabilityAdjustment.Width - Rect_Slider.Right, Panel_ProbabilityAdjustment.Height));
-
-            Rect_Slider.Width = Math.Max(1, Rect_Slider.Width);
-            Rect_ScrollBar_Current.Width = Math.Max(1, Rect_ScrollBar_Current.Width);
-            Rect_ScrollBar_Unavailable.Width = Math.Max(1, Rect_ScrollBar_Unavailable.Width);
-
-            GraphicsPath Path_ScrollBar_Unavailable = new GraphicsPath();
-            Path_ScrollBar_Unavailable.AddRectangle(Rect_ScrollBar_Unavailable);
-            PathGradientBrush PGB_ScrollBar_Unavailable = new PathGradientBrush(Path_ScrollBar_Unavailable)
-            {
-                CenterColor = Color_ScrollBar_Unavailable,
-                SurroundColors = new Color[] { Com.ColorManipulation.ShiftLightnessByHSL(Color_ScrollBar_Unavailable, 0.3) },
-                FocusScales = new PointF(1F, 0F)
-            };
-            ProbabilityTrbBmpGrap.FillPath(PGB_ScrollBar_Unavailable, Path_ScrollBar_Unavailable);
-            Path_ScrollBar_Unavailable.Dispose();
-            PGB_ScrollBar_Unavailable.Dispose();
-
-            GraphicsPath Path_ScrollBar_Current = new GraphicsPath();
-            Path_ScrollBar_Current.AddRectangle(Rect_ScrollBar_Current);
-            PathGradientBrush PGB_ScrollBar_Current = new PathGradientBrush(Path_ScrollBar_Current)
-            {
-                CenterColor = Color_ScrollBar_Current,
-                SurroundColors = new Color[] { Com.ColorManipulation.ShiftLightnessByHSL(Color_ScrollBar_Current, 0.3) },
-                FocusScales = new PointF(1F, 0F)
-            };
-            ProbabilityTrbBmpGrap.FillPath(PGB_ScrollBar_Current, Path_ScrollBar_Current);
-            Path_ScrollBar_Current.Dispose();
-            PGB_ScrollBar_Current.Dispose();
-
-            GraphicsPath Path_Slider = new GraphicsPath();
-            Path_Slider.AddRectangle(Rect_Slider);
-            PathGradientBrush PGB_Slider = new PathGradientBrush(Path_Slider)
-            {
-                CenterColor = Color_Slider,
-                SurroundColors = new Color[] { Com.ColorManipulation.ShiftLightnessByHSL(Color_Slider, 0.3) },
-                FocusScales = new PointF(1F, 0F)
-            };
-            ProbabilityTrbBmpGrap.FillPath(PGB_Slider, Path_Slider);
-            Path_Slider.Dispose();
-            PGB_Slider.Dispose();
 
             //
 
