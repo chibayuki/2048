@@ -2,7 +2,7 @@
 Copyright © 2013-2018 chibayuki@foxmail.com
 
 2048
-Version 7.1.17000.5459.R17.180613-0000
+Version 7.1.17000.5459.R17.180617-0000
 
 This file is part of 2048
 
@@ -39,7 +39,7 @@ namespace WinFormApp
         private static readonly Int32 BuildNumber = new Version(Application.ProductVersion).Build; // 版本号。
         private static readonly Int32 BuildRevision = new Version(Application.ProductVersion).Revision; // 修订版本。
         private static readonly string LabString = "R17"; // 分支名。
-        private static readonly string BuildTime = "180613-0000"; // 编译时间。
+        private static readonly string BuildTime = "180617-0000"; // 编译时间。
 
         //
 
@@ -841,7 +841,7 @@ namespace WinFormApp
                             {
                                 try
                                 {
-                                    Com.IO.CopyFolder(Dir, RootDir_CurrentVersion);
+                                    Com.IO.CopyFolder(Dir, RootDir_CurrentVersion, true, true, true);
 
                                     break;
                                 }
@@ -869,7 +869,19 @@ namespace WinFormApp
                 {
                     foreach (var V in OldVersionList)
                     {
-                        Com.IO.DeleteFolder(RootDir_Product + "\\" + V.Build + "." + V.Revision);
+                        string Dir = RootDir_Product + "\\" + V.Build + "." + V.Revision;
+
+                        if (Directory.Exists(Dir))
+                        {
+                            try
+                            {
+                                Directory.Delete(Dir, true);
+                            }
+                            catch
+                            {
+                                continue;
+                            }
+                        }
                     }
                 }
             }
@@ -1147,7 +1159,7 @@ namespace WinFormApp
                     {
                         string SubStr = Com.Text.GetIntervalString(Str, "<BestRecord>", "</BestRecord>", false, false);
 
-                        while (SubStr.IndexOf("(") != -1 && SubStr.IndexOf(")") != -1)
+                        while (SubStr.Contains("(") && SubStr.Contains(")"))
                         {
                             try
                             {
@@ -1320,7 +1332,7 @@ namespace WinFormApp
 
                         string SubStr = Com.Text.GetIntervalString(Str, "<Element>", "</Element>", false, false);
 
-                        while (SubStr.IndexOf("(") != -1 && SubStr.IndexOf(")") != -1)
+                        while (SubStr.Contains("(") && SubStr.Contains(")"))
                         {
                             try
                             {
@@ -1524,7 +1536,7 @@ namespace WinFormApp
                     PreviousStrLen = SubStr.Length;
                     PreviousPct = (double)PreviousStrLen / StepListString.Length;
 
-                    while (SubStr.IndexOf("{") != -1 && SubStr.IndexOf("}") != -1)
+                    while (SubStr.Contains("{") && SubStr.Contains("}"))
                     {
                         try
                         {
@@ -1538,13 +1550,12 @@ namespace WinFormApp
                             string StepString = Com.Text.GetIntervalString(SubStr, "{", "}", false, false);
 
                             Step S = new Step();
-                            S.Array = new Int32[CAPACITY, CAPACITY];
 
                             //
 
                             string StepString_Array = Com.Text.GetIntervalString(StepString, "[", "]", false, false);
 
-                            while (StepString_Array.IndexOf("(") != -1 && StepString_Array.IndexOf(")") != -1)
+                            while (StepString_Array.Contains("(") && StepString_Array.Contains(")"))
                             {
                                 try
                                 {
@@ -1636,7 +1647,7 @@ namespace WinFormApp
                     NextStrLen = SubStr.Length;
                     NextPct = (double)PreviousStrLen / StepListString.Length;
 
-                    while (SubStr.IndexOf("(") != -1 && SubStr.IndexOf(")") != -1)
+                    while (SubStr.Contains("(") && SubStr.Contains(")"))
                     {
                         try
                         {
@@ -3332,8 +3343,13 @@ namespace WinFormApp
 
         #region 步骤管理
 
-        private struct Step // 操作步骤。
+        private class Step // 操作步骤。
         {
+            public Step()
+            {
+                Array = new Int32[CAPACITY, CAPACITY];
+            }
+
             public Int32[,] Array; // 二维矩阵。
             public double Score; // 得分。
 
