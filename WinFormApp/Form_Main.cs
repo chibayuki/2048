@@ -2,7 +2,7 @@
 Copyright © 2018 chibayuki@foxmail.com
 
 2048
-Version 7.1.17000.7015.R18.180924-0000
+Version 7.1.17000.7044.R18.181002-1400
 
 This file is part of 2048
 
@@ -39,7 +39,7 @@ namespace WinFormApp
         private static readonly Int32 BuildNumber = new Version(Application.ProductVersion).Build; // 版本号。
         private static readonly Int32 BuildRevision = new Version(Application.ProductVersion).Revision; // 修订版本。
         private static readonly string LabString = "R18"; // 分支名。
-        private static readonly string BuildTime = "180924-0000"; // 编译时间。
+        private static readonly string BuildTime = "181002-1400"; // 编译时间。
 
         //
 
@@ -71,8 +71,8 @@ namespace WinFormApp
             new Version(7, 1, 17000, 5033),
             new Version(7, 1, 17000, 5120),
             new Version(7, 1, 17000, 5193),
-            new Version(7, 1, 17000, 5459),/*
-            new Version(7, 1, 17000, 7015)*/
+            new Version(7, 1, 17000, 5459),
+            new Version(7, 1, 17000, 7015)
         };
 
         //
