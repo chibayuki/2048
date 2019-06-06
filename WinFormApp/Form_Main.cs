@@ -1,8 +1,8 @@
 ﻿/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-Copyright © 2018 chibayuki@foxmail.com
+Copyright © 2019 chibayuki@foxmail.com
 
 2048
-Version 7.1.17000.7044.R19.190324-0000
+Version 7.1.17000.7114.R19.190525-1400
 
 This file is part of 2048
 
@@ -39,7 +39,7 @@ namespace WinFormApp
         private static readonly Int32 BuildNumber = new Version(Application.ProductVersion).Build; // 版本号。
         private static readonly Int32 BuildRevision = new Version(Application.ProductVersion).Revision; // 修订版本。
         private static readonly string LabString = "R19"; // 分支名。
-        private static readonly string BuildTime = "190324-0000"; // 编译时间。
+        private static readonly string BuildTime = "190525-1400"; // 编译时间。
 
         //
 
@@ -72,8 +72,8 @@ namespace WinFormApp
             new Version(7, 1, 17000, 5120),
             new Version(7, 1, 17000, 5193),
             new Version(7, 1, 17000, 5459),
-            new Version(7, 1, 17000, 7015),/*
-            new Version(7, 1, 17000, 7044)*/
+            new Version(7, 1, 17000, 7015),
+            new Version(7, 1, 17000, 7044)
         };
 
         //
@@ -5036,10 +5036,7 @@ namespace WinFormApp
             // 鼠标释放 Panel_ProbabilityAdjustment。
             //
 
-            if (e.Button == MouseButtons.Left)
-            {
-                ProbabilityIsAdjusting = false;
-            }
+            ProbabilityIsAdjusting = false;
         }
 
         private void Panel_ProbabilityAdjustment_MouseMove(object sender, MouseEventArgs e)
@@ -5048,7 +5045,7 @@ namespace WinFormApp
             // 鼠标经过 Panel_ProbabilityAdjustment。
             //
 
-            if (ProbabilityIsAdjusting == true)
+            if (ProbabilityIsAdjusting)
             {
                 ProbabilityAdjustment();
             }
